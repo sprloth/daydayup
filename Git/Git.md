@@ -381,7 +381,7 @@ git show [<options>…] [<object>…]
 git log [<options>…] [<revision range>] [[--] <path>…]
 ```
 
-显示提交日志。默认不用任何参数的话，会按提交时间由近到远列出每个提交的提交对象哈希值、作者的名字和电子邮箱地址、提交时间以及提交说明。`<revision range>`特殊情况可以使用`A..B`限制从A可以访问，但不能从B访问的所有提交。
+显示提交日志。默认不用任何参数的话，会按提交时间由近到远列出每个提交的提交对象哈希值、作者的名字和电子邮箱地址、提交时间以及提交说明。`<revision range>`特殊情况可以使用`A..B`限制从B可以访问，但不能从A访问的所有提交。
 
 `-p`, `-u`, `--patch`
 
@@ -459,6 +459,10 @@ git log [<options>…] [<revision range>] [[--] <path>…]
 
 仅显示文件中添加或移除了某个关键字的提交。
 
+`-g`, `--walk-reflogs`
+
+显示引用日志。
+
 ### diff
 
 ```shell
@@ -467,7 +471,7 @@ git diff [<options>…] <commit> <commit> [--] [<path>…]
 git diff [<options>…] <blob> <blob>
 ```
 
-显示文件发生的变化。第一种格式默认比较的是工作树中当前文件和Git仓库指定提交对象`<commit>`之间的差异。如果省略`<commit>`，则比较工作树和暂存区域快照之间的差异， 也就是修改之后还没有暂存起来的变化内容。第二种格式用于比较Git仓库中任意两个提交对象`<commit>`之间的差异。两个`<commit>`之间插入两点`<commit>..<commit>`与空格同作用，省略一侧的`<commit>`与使用`HEAD`具有相同的效果。两个`<commit>`之间插入三点`<commit>...<commit>`用于比较两个`<commit>`最近的共同祖先和第二个`<commit>`之间的差异，如`git diff A...B`相当于`git diff $(git merge-base A B) B`。第三种格式用于比较Git仓库中任意两个数据对象`<blob>`之间的差异。
+显示文件发生的变化。第一种格式默认比较的是工作树中当前文件和Git仓库指定提交对象`<commit>`之间的差异。如果省略`<commit>`，则比较工作树和暂存区域快照之间的差异， 也就是修改之后还没有暂存起来的变化内容。第二种格式用于比较Git仓库中任意两个提交对象`<commit>`之间的差异，右边的`<commit>`相对于左边的`<commit>`的差异。两个`<commit>`之间插入两点`<commit>..<commit>`与空格同作用，省略一侧的`<commit>`与使用`HEAD`具有相同的效果。两个`<commit>`之间插入三点`<commit>...<commit>`用于比较两个`<commit>`最近的共同祖先和第二个`<commit>`之间的差异，如`git diff A...B`相当于`git diff $(git merge-base A B) B`。第三种格式用于比较Git仓库中任意两个数据对象`<blob>`之间的差异。
 
 `--staged`, `--cached`
 
@@ -656,6 +660,16 @@ git remote update [<options>…] [(<group> | <remote>)…]
 `-v`, `--verbose`
 
 针对默认命令显示需要读写远程仓库的别名与其对应的地址。
+
+## 管理
+
+### reflog
+
+```shell
+git reflog [show] [<options>…] [<ref>]
+```
+
+管理引用日志。show子命令也是没有任何子命令时的默认命令，显示本地对引用`<ref>`的头指针所做更改的日志，默认是`HEAD`。
 
 # 常用操作
 
