@@ -199,7 +199,7 @@ HEAD指向任意提交对象，而不是分支。
 
 **refs/heads/**
 
-存储本地引用的目录。**本地引用**指向本地分支提交之首，对于本地分支。
+存储本地引用的目录。**本地引用**指向本地分支提交之首，对应于本地分支。
 
 **refs/remotes/**
 
@@ -208,6 +208,10 @@ HEAD指向任意提交对象，而不是分支。
 **refs/tags/**
 
 存储标签引用的目录。**标签引用**永远指向一个固定的对象，可看作给这个对象加上一个更友好的名字。标签类型有：**轻量标签（lightweight tag）**和**附注标签（annotated tag）**。**轻量标签**简单的指向一个非标签对象，**附注标签**指向一个标签对象。
+
+**refs/stash**
+
+指向最近一次储藏的引用文件。
 
 **HEAD**
 
@@ -649,6 +653,40 @@ git tag [<options>…] <tagname>…
 
 只针对第三种格式，删除本地仓库上的标签。
 
+### stash
+
+```sh
+git stash [push] [<options>…] [--] [<pathspec>…]
+git stash list [<options>…]
+git stash show [<options>…] [<stash>]
+git stash apply [<options>…] [<stash>]
+git stash pop [<options>…] [<stash>]
+git stash drop [<options>…] [<stash>]
+git stash clear
+```
+
+管理储藏。`push`子命令是没有任何子命令时的默认命令，存储工作树和暂存区的修改到储藏，并将其恢复到干净的状态，即与`HEAD`一致。`list`子命令显示当前所有的储藏。`show`子命令显示储藏`<stash>`（默认是最近的储藏）中的修改内容。`apply`子命令将储藏`<stash>`中的修改内容重新应用到当前工作树。`pop`子命令在`apply`到基础上删除储藏`<stash>`，如果存在冲突则不会删除。`drop`子命令删除储藏`<stash>`。`clear`子命令删除所有储藏。
+
+`-k`, `--keep-index`
+
+只针对第一种格式，保持暂存区的修改，不恢复暂存区。
+
+`-u`, `--include-untracked`
+
+只针对第一种格式，储藏所有未跟踪的文件，并清理。
+
+`-m <msg>`, `--message <msg>`
+
+只针对第一种格式，设置储藏的描述信息。
+
+`-p`, `--patch`
+
+只针对第一种格式，以交互方式选择文件的部分修改进行储藏。
+
+`--index`
+
+只针对第四和第五种格式，将之前暂存到文件重新暂存，否则之前暂存的文件只会应用到工作树。
+
 ## 分享与更新
 
 ### fetch
@@ -695,12 +733,6 @@ git remote add [<options>…] <name> <url>
 git remote rename <old> <new>
 git remote (remove | rm) <name>
 git remote show [<options>…] <name>…
-git remote set-head <name> (-a | --auto | -d | --delete | <branch>)
-git remote set-branches [<options>…] <name> <branch>…
-git remote get-url [<options>…] <name>
-git remote set-url [<options>…] <name> <newurl> [<oldurl>]
-git remote prune [<options>…] <name>…
-git remote update [<options>…] [(<group> | <remote>)…]
 ```
 
 管理远程仓库。默认命令列出每一个远程仓库的别名。`add`子命令添加一个别名为`<name>`，位于`<url>`的远程仓库。`rename`子命令修改远程仓库`<old>`的别名为`<new>`，并修改所有远程引用。`remote`或`rm`子命令从本地移除远程仓库`<name>`，并移除所有远程引用。`show`子命令显示远程仓库`<name>`的信息，包括读写远程仓库的地址、当前所处的分支、远程仓库的所有分支、`git pull`会拉取的所有远程分支、`git push`会推送的所有远程分支。
@@ -711,13 +743,37 @@ git remote update [<options>…] [(<group> | <remote>)…]
 
 ## 管理
 
+### clean
+
+```sh
+git clean [<options>…] [--] [<path>…]
+```
+
+删除工作树中当前目录下的未跟踪文件，不包括忽略的文件。
+
+`-d`
+
+删除未跟踪的目录。
+
+`-x`
+
+删除忽略的文件。
+
+`-n`, `--dry-run`
+
+显示将会做什么，而不实际执行。
+
+`-i`, `--interactive`
+
+以交互方式清理文件。
+
 ### reflog
 
 ```shell
 git reflog [show] [<options>…] [<ref>]
 ```
 
-管理引用日志。show子命令也是没有任何子命令时的默认命令，显示本地对引用`<ref>`的头指针所做更改的日志，默认是`HEAD`。
+管理引用日志。`show`子命令是没有任何子命令时的默认命令，显示本地对引用`<ref>`的头指针所做更改的日志，默认是`HEAD`。
 
 # 常用操作
 
