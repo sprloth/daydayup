@@ -816,13 +816,33 @@ ssh-keygen -t rsa -b 4096 -m PEM -C "your_email@example.com"
 **取消暂存的文件**
 
 ```shell
-git reset HEAD file.txt
+git reset file.txt
 ```
 
 **撤消对文件的修改**
 
 ```shell
-git checkout -- file.txt
+git checkout file.txt
+```
+
+**修改最后一次提交**
+
+```shell
+# 只替换提交信息
+git commit --amend -o -m "message"
+# 或
+# 添加或删除文件
+git add file1
+git rm file2
+# 替换最后一次提交
+git commit --amend -m "message"
+```
+
+**修改最近多个提交**
+
+```shell
+# 交互方式修改最近三个提交
+git rebase -i HEAD~3
 ```
 
 **创建并切换一个跟踪分支**
@@ -830,12 +850,11 @@ git checkout -- file.txt
 ```shell
 # 本地分支与远程分支同名
 git checkout --track origin/serverfix
-```
-
-或
-
-```shell
+# 或
+git checkout serverfix
+# 或
 # 本地分支与远程分支不同名
 git checkout -b sf origin/serverfix
 ```
+
 
