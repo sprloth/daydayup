@@ -22,7 +22,7 @@ Git项目有三个工作区域：**Git仓库（Git directory/repository）**、*
 
 **裸仓库（bare repository）**
 
-一个不包含当前工作目录的仓库，通常是一个以`.git`结尾的目录。
+一个不包含当前工作树的仓库，通常是一个以`.git`结尾的目录。
 
 **commit-ish/commitish**
 
@@ -336,11 +336,11 @@ git init [<options>…] [directory]
 git clone [<options>…] [--] <url> [<directory>]
 ```
 
-从服务器克隆一个现有的Git仓库。该命令将创建了一个新目录`<directory>`（默认与远程仓库同名），切换到新的目录，然后执行`git init`来初始化一个空的Git仓库， 执行`git remote add`来使用指定的`<url>`添加一个远程仓库（默认别名为`origin`），再针对远程仓库执行`git fetch`抓取所有信息，最后通过`git checkout`创建一个与远程仓库默认分支同名的跟踪分支，将跟踪分支最新提交检出到本地的工作目录。
+从服务器克隆一个现有的Git仓库。该命令将创建了一个新目录`<directory>`（默认与远程仓库同名），切换到新的目录，然后执行`git init`来初始化一个空的Git仓库， 执行`git remote add`来使用指定的`<url>`添加一个远程仓库（默认别名为`origin`），再针对远程仓库执行`git fetch`抓取所有信息，最后通过`git checkout`创建一个与远程仓库默认分支同名的跟踪分支，将跟踪分支最新提交检出到本地的工作树。
 
 `--bare`
 
-通过克隆来创建一个裸仓库，即一个不包含当前工作目录的仓库。
+通过克隆来创建一个裸仓库，即一个不包含当前工作树的仓库。
 
 ## 基本快照
 
@@ -391,6 +391,31 @@ git commit [<options>…] [--] [<file>…]
 `--amend`
 
 通过创建新提交替换当前分支的最近一次提交。
+
+`-o`, `--only`
+
+不提交暂存区的修改，如果指定`<file>`，则直接提交该文件在工作树的修改。
+
+### reset
+
+```shell
+git reset [<options>…] [<commit>]
+git reset [<options>…] [<tree-ish>] [--] <paths>…
+```
+
+移动`HEAD`对应的分支指向，使用指向的内容覆盖更新暂存区和工作树。第一种格式移动`HEAD`对应的分支指向`<commit>`（默认是`HEAD`），可选的使用`<commit>`的内容覆盖更新暂存区和工作树。如果更新工作树，会删除`<commit>`中没有但`reset`之前有的已跟踪文件，以及丢失已跟踪文件的本地修改。第二种格式使用`<tree-ish>`中路径`<paths>`下的所有内容覆盖更新暂存区，不修改`HEAD`对应的分支和工作树。
+
+`--soft`
+
+只针对第一种格式，移动`HEAD`对应的分支指向，不更新暂存区和工作树。
+
+`--mixed`
+
+只针对第一种格式，没有选项时的默认行为，移动`HEAD`对应的分支指向，更新暂存区，不更新工作。
+
+`--hard`
+
+只针对第一种格式，移动`HEAD`对应的分支指向，更新暂存区和工作树。
 
 ### rm
 
@@ -560,7 +585,7 @@ git branch [<options>…] [<branchname>]
 git branch [<options>…] <branchname>…
 ```
 
-管理分支。第一种格式用于列出已有的分支，默认只列出本地分支。第二种格式用于创建一个指向`HEAD`或提交对象`<start_point>`的本地分支`<branchname>`，未指定`<start-point>`时默认是`HEAD`。`<start-point>`特殊情况可以使用`A...B`作为A和B最近的共同祖先。第三种格式用于修改分支信息，默认是当前分支。第四种格式用于删除本地分支。
+管理分支。第一种格式用于列出已有的分支，默认只列出本地分支。第二种格式用于创建一个指向提交对象`<start_point>`的本地分支`<branchname>`，未指定`<start-point>`时默认是`HEAD`。`<start-point>`特殊情况可以使用`A...B`作为A和B最近的共同祖先。第三种格式用于修改分支信息，默认是当前分支。第四种格式用于删除本地分支。
 
 `-l [<pattern>…]`, `--list [<pattern>…]`
 
@@ -599,9 +624,10 @@ git branch [<options>…] <branchname>…
 ```shell
 git checkout [<options>…] [<branch>]
 git checkout [<options>…] [<start_point>]
+git checkout [<options>…] [<tree-ish>] [--] <paths>…
 ```
 
-切换分支或检出内容到工作目录。第一种格式用于切换分支，如果本地分支没有`<branch>`，但远程跟踪分支有，则等价于`git checkout -b <branch> --track <remote>/<branch>`。第二种格式用于创建一个指向提交对象`<start_point>`的本地分支并切换到该分支。
+切换分支或检出内容到暂存区和工作树。第一种格式用于切换分支并检出，如果本地分支没有`<branch>`，但远程跟踪分支有，则等价于`git checkout -b <branch> --track <remote>/<branch>`。第二种格式将`HEAD`指向提交对象`<start_point>`并检出，如果没有选项创建本地分支，则`HEAD`将变成游离。第一和第二种格式检出到工作树会尝试合并，存在冲突会导致检出失败。第三种格式使用`<tree-ish>`中路径`<paths>`下的所有内容覆盖更新暂存区和工作树，会丢失已跟踪文件的本地修改。如果`<tree-ish>`省略，则使用暂存区覆盖更新工作树。
 
 `-t`, `--track`
 
