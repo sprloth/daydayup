@@ -44,17 +44,17 @@ HEAD指向任意提交对象，而不是分支。
 
 一种短期分支，被用来实现单一特性或其相关工作。
 
-**远程跟踪分支（remote-tracking branch）**
-
-远程分支状态的引用，对应于远程引用，命名格式为`(remote)/(branch)`。
-
 **跟踪分支（tracking branch）**
 
-与远程分支有直接关系的本地分支，即从远程跟踪分支检出的本地分支，其跟踪的分支为上游分支。
+跟踪另一个分支的本地分支，其跟踪的分支为上游分支。通常从远程跟踪分支检出的本地分支，会跟踪该远程分支。
 
 **上游分支（upstream branch）**
 
-被本地分支跟踪的远程分支，通过config配置文件的`branch.<name>.remote`和`branch.<name>.merge`配置。命令行中经常使用远程跟踪分支来指代上游分支。上游分支可以通过`@{upstream}`或`@{u}`来引用。
+被本地分支跟踪的分支，可以是本地分支，也可以是远程分支，通过config配置文件的`branch.<name>.remote`和`branch.<name>.merge`配置。上游分支可以通过`@{upstream}`或`@{u}`来引用。
+
+**远程跟踪分支（remote-tracking branch）**
+
+远程分支状态的引用，对应于远程引用，命名格式为`<remote>/<branch>`。命令行中经常使用远程跟踪分支来指代远程分支。
 
 **合并源分支**
 
@@ -372,6 +372,10 @@ git status [<options>…] [--] [<pathspec>…]
 
 紧凑格式输出。每个文件前面有两个字母标记，对于没有合并冲突，左边字母表示该文件在暂存区中的状态，右边字母表示该文件在工作树中的状态；对于存在合并冲突，左边字母表示该文件在本地的状态，右边字母表示该文件在对方的状态。` `表示未经修改，`M`表示已修改，`A`表示已添加，`D`表示已删除，`R`表示重命名，`C`表示已复制，`U`表示已更新未合并，`??`表示未跟踪，`!!`表示忽略。
 
+`-b`, `--branch`
+
+显示分支和对应的上游分支，即使是紧凑格式。
+
 ### commit
 
 ```shell
@@ -458,7 +462,7 @@ git show [<options>…] [<object>…]
 git log [<options>…] [<revision range>] [[--] <path>…]
 ```
 
-显示提交日志。默认不用任何参数的话，会按提交时间由近到远列出每个提交的提交对象哈希值、作者的名字和电子邮箱地址、提交时间以及提交说明。`<revision range>`特殊情况可以使用`A..B`限制从B可以访问，但不能从A访问的所有提交。
+显示提交日志。默认不用任何参数的话，会按提交时间由近到远列出每个提交的提交对象哈希值、作者的名字和电子邮箱地址、提交时间以及提交说明。`<revision range>`默认是`HEAD`，特殊情况可以使用`A..B`限制从B可以访问，但不能从A访问的所有提交。
 
 `-p`, `-u`, `--patch`
 
@@ -609,7 +613,7 @@ git branch [<options>…] <branchname>…
 
 `-u <upstream>`, `--set-upstream-to=<upstream>`
 
-设置分支的上游分支。
+只针对第三种格式，设置分支的上游分支。
 
 `-d`, `--delete`
 
@@ -618,40 +622,6 @@ git branch [<options>…] <branchname>…
 `-D`
 
 只针对第四种格式，强制删除指定的本地分支，相当于`--delete --force`。
-
-### checkout
-
-```shell
-git checkout [<options>…] [<branch>]
-git checkout [<options>…] [<start_point>]
-git checkout [<options>…] [<tree-ish>] [--] <paths>…
-```
-
-切换分支或检出内容到暂存区和工作树。第一种格式用于切换分支并检出，如果本地分支没有`<branch>`，但远程跟踪分支有，则等价于`git checkout -b <branch> --track <remote>/<branch>`。第二种格式将`HEAD`指向提交对象`<start_point>`并检出，如果没有选项创建本地分支，则`HEAD`将变成游离。第一和第二种格式检出到工作树会尝试合并，存在冲突会导致检出失败。第三种格式使用`<tree-ish>`中路径`<paths>`下的所有内容覆盖更新暂存区和工作树，会丢失已跟踪文件的本地修改。如果`<tree-ish>`省略，则使用暂存区覆盖更新工作树。
-
-`-t`, `--track`
-
-只针对第二种格式，创建一个上游分支是`<start_point>`的跟踪分支。如果没有`-b <branchname>`选项，则跟踪分支的名称与上游分支同名。
-
-`-b <branchname>`
-
-只针对第二种格式，相当于使用`git branch`创建一个名称为`<branchname>`本地分支，然后切换到该分支。如果`<start_point>`是远程跟踪分支，则设置新创建的本地分支跟踪`<start_point>`。
-
-### merge
-
-```shell
-git merge [<options>…] [<commit>…]
-```
-
-合并一个或多个分支到当前的分支中。
-
-`--no-commit`
-
-执行合并，并在创建合并提交之前停止。此时暂存区是合并状态。
-
-`--squash`
-
-接受合并源分支上的所有提交，更新工作树和暂存区，但不会记录`MERGE_HEAD`，也不会进行合并提交。暂存区是合并状态这意味着可以做更多的改动，并将合并作为一个新的普通提交，该提交将只有一个父提交。
 
 ### tag
 
@@ -678,6 +648,74 @@ git tag [<options>…] <tagname>…
 `-d`, `--delete`
 
 只针对第三种格式，删除本地仓库上的标签。
+
+### checkout
+
+```shell
+git checkout [<options>…] [<branch>]
+git checkout [<options>…] [<start_point>]
+git checkout [<options>…] [<tree-ish>] [--] <paths>…
+```
+
+切换分支或检出内容到暂存区和工作树。第一种格式用于切换分支并检出，如果本地分支没有`<branch>`，但远程跟踪分支有，则等价于`git checkout -b <branch> --track <remote>/<branch>`。第二种格式将`HEAD`指向提交对象`<start_point>`并检出，如果没有选项创建本地分支，则`HEAD`将变成游离。第一和第二种格式检出到工作树会尝试合并，存在冲突会导致检出失败。第三种格式使用`<tree-ish>`中路径`<paths>`下的所有内容覆盖更新暂存区和工作树，会丢失已跟踪文件的本地修改。如果`<tree-ish>`省略，则使用暂存区覆盖更新工作树。
+
+`-t`, `--track`
+
+只针对第二种格式，创建一个上游分支是`<start_point>`的跟踪分支。如果没有`-b <branchname>`选项，则跟踪分支的名称与上游分支同名。
+
+`-b <branchname>`
+
+只针对第二种格式，相当于使用`git branch`创建一个名称为`<branchname>`本地分支，然后切换到该分支。如果`<start_point>`是远程跟踪分支，则设置新创建的本地分支跟踪`<start_point>`。
+
+### merge
+
+```shell
+git merge [<options>…] [<commit>…]
+```
+
+将提交对象`<commit>`的历史从分叉的地方合并到当前的分支中。如果省略`<commit>`，则从跟踪分支合并。如果创建合并提交，其第一个父提交是当前分支指向的提交，之后父提交依次是指定的提交对象`<commit>`。
+
+`--ff`
+
+如果允许快进，则直接进行快进合并。合并的默认行为。
+
+`--no-ff`
+
+即使允许快进，也要创建合并提交。
+
+`--no-commit`
+
+执行合并，并在创建合并提交之前停止。此时暂存区是合并状态。
+
+`--squash`
+
+接受合并源分支上的所有提交，更新工作树和暂存区，但不会记录`MERGE_HEAD`，也不会进行合并提交。暂存区是合并状态这意味着可以做更多的改动，并将合并作为一个新的普通提交，该提交将只有一个父提交。
+
+### rebase
+
+
+
+
+
+### cherry-pick
+
+```shell
+git cherry-pick [<options>…] <commit>…
+```
+
+将一个或多个提交`<commit>`的修改内容应用到当前分支中，并为每个提交创建一个新的提交。
+
+### revert
+
+```shell
+git revert [<options>…] <commit>…
+```
+
+通过将之前提交中的变更，以完全相反的方式应用到新创建的提交中，来还原之前到提交。
+
+`-m parent-number`, `--mainline parent-number`
+
+对于还原合并提交，指定需要被保留下来的父提交编号，1表示合并目标分支的父提交编号，2表示合并源分支的父提交编号。如果还原了合并提交，之后再进行合并，只会合并还原之后的提交。
 
 ### stash
 
@@ -857,4 +895,10 @@ git checkout serverfix
 git checkout -b sf origin/serverfix
 ```
 
+**删除远程分支**
+
+```shell
+# 删除远程dev分支
+git push origin :dev
+```
 
