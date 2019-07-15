@@ -693,9 +693,19 @@ git merge [<options>…] [<commit>…]
 
 ### rebase
 
+```shell
+git rebase [<options>…] [<upstream> [<branch>]]
+```
 
+计算出一系列的提交`<upstream>..<branch>`，将其以同样的顺序应用到另一个提交（默认是`<upstream>`）上，一般称为**变基**。它的原理是首先检出`<branch>`（默认是`HEAD`），然后提取`<upstream>..<branch>`（从`<upstream>`不能访问，从`<branch>`可以访问。`<upstream>`可以是任何提交对象，默认是当前分支的上游分支）的提交保存到临时区，然后通过`git reset —hard`，将`<branch>`指向另一个提交（默认是`<upstream>`），最后将之前保存到临时区的提交依次应用到新的`<branch>`上（为每个提交创建一个新的提交。如果重新应用的提交已经在新的`<branch>`中有了，则会跳过该提交）。
 
+`--onto <newbase>`
 
+指定应用到的另一个提交，即创建新提交的起始点。
+
+`-i`, `--interactive`
+
+以交互方式变基，将在文本编辑器上展示一个需要变基的提交列表，通过修改该列表，保存并退出后进行变基。
 
 ### cherry-pick
 
@@ -703,7 +713,7 @@ git merge [<options>…] [<commit>…]
 git cherry-pick [<options>…] <commit>…
 ```
 
-将一个或多个提交`<commit>`的修改内容应用到当前分支中，并为每个提交创建一个新的提交。
+将一个或多个提交`<commit>`的修改内容应用到当前分支上（为每个提交创建一个新的提交）。
 
 ### revert
 
