@@ -302,7 +302,20 @@ HEAD指向任意提交对象，而不是分支。
 	push = refs/heads/master:refs/heads/qa/master
 ```
 
-`origin`表示远程仓库的别名。`url`表示远程仓库的地址。`fetch`表示抓取的引用规格，可参考[名词解释](#名词解释)中的*引用规格（refspec）*。`push`表示推送的引用规格。
+`remote.<name>`（origin）表示远程仓库的别名。`remote.<name>.url`表示该远程仓库的地址。`remote.<name>.fetch`表示抓取的引用规格，可参考[名词解释](#名词解释)中的*引用规格（refspec）*。`remote.<name>.push`表示推送的引用规格。
+
+**branch**
+
+```ini
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[branch "test"]
+	remote = .
+	merge = refs/heads/dev
+```
+
+`branch.<name>`（master、test）表示分支的名称。`branch.<name>.remote`表示该分支抓取或推送的默认仓库别名，`.`是当前本地仓库。`branch.<name>.merge`表示该分支的上游分支，其值为`branch.<name>.remote`指定仓库的分支引用，拉取时从其值对应的分支合并。
 
 ## gitignore
 
@@ -922,5 +935,15 @@ git checkout -b sf origin/serverfix
 ```shell
 # 删除远程dev分支
 git push origin :dev
+```
+
+**迁移仓库**
+
+```shell
+# 裸克隆老仓库
+git clone --bare https://github.com/exampleuser/old-repository.git
+cd old-repository.git
+# 镜像推送至新仓库
+git push --mirror https://github.com/exampleuser/new-repository.git
 ```
 
